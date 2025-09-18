@@ -2,64 +2,65 @@
 require_once 'config.php';
 $mysqli = db_connect();
 
-// подтягивание заданий
-$stmt = $mysqli->prepare("SELECT id, title, description, status, created_at FROM tasks ORDER BY created_at DESC");
+$stmt = $mysqli->prepare("SELECT id, title, amount, type, status, created_at FROM finances ORDER BY created_at DESC");
 $stmt->execute();
 $result = $stmt->get_result();
-$tasks = $result->fetch_all(MYSQLI_ASSOC);
+$records = $result->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 ?>
 <!doctype html>
-<html lang="ru"> 
+<html lang="ru">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Task Manager</title>
+  <title>Finance Manager</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 <div class="container py-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1>Task Manager</h1>
-    <a href="add.php" class="btn btn-primary">Добавить задачу</a>
+    <h1>Учёт личных финансов</h1>
+    <a href="add.php" class="btn btn-primary">Добавить запись</a>
   </div>
 
   <div class="card">
     <div class="card-body">
-      <?php if (count($tasks) === 0): ?>
-        <p class="text-muted">Задач пока нет. Добавьте первую задачу.</p>
+      <?php if (count($records) === 0): ?>
+        <p class="text-muted">Записей пока нет. Добавьте первую запись.</p>
       <?php else: ?>
         <div class="table-responsive">
         <table class="table table-striped align-middle">
           <thead>
             <tr>
-              <th>Заголовок</th>
-              <th>Описание</th>
+              <th>Название</th>
+              <th>Сумма</th>
+              <th>Тип</th>
               <th>Статус</th>
-              <th>Создано</th>
+              <th>Дата</th>
               <th>Действия</th>
             </tr>
           </thead>
           <tbody>
-            <?php foreach($tasks as $task): ?>
+            <?php foreach($records as $rec): ?>
               <tr>
-                <td><?= htmlspecialchars($task['title']) ?></td>
-                <td><?= nl2br(htmlspecialchars($task['description'])) ?></td>
+                <td><?= htmlspecialchars($rec['title']) ?></td>
+                <td><?= htmlspecialchars($rec['amount']) ?></td>
+                <td><?= htmlspecialchars($rec['type']) ?></td>
                 <td>
-                  <?php if ($task['status']): ?>
-                    <span class="badge bg-success">Выполнена</span>
+                  <?php if ($rec['status']): ?>
+                    <span class="badge bg-success">Закрыта</span>
                   <?php else: ?>
-                    <span class="badge bg-secondary">Не выполнена</span>
+                    <span class="badge bg-secondary">Актуальная</span>
                   <?php endif; ?>
                 </td>
-                <td><?= htmlspecialchars($task['created_at']) ?></td>
+                <td><?= htmlspecialchars($rec['created_at']) ?></td>
                 <td>
-                  <a href="edit.php?id=<?= $task['id'] ?>" class="btn btn-sm btn-outline-primary">Редактировать</a>
-                  <a href="delete.php?id=<?= $task['id'] ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Удалить задачу?');">Удалить</a>
-                  <?php if (!$task['status']): ?>
-                    <a href="update_status.php?id=<?= $task['id'] ?>&action=done" class="btn btn-sm btn-success">Отметить выполненной</a>
+                  <a href="edit.php?id=<?= $rec['id'] ?>" class="btn btn-sm btn-outline-primary">Редактировать</a>
+                  <a href="delete.php?id=<?= $rec['id'] ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Удалить запись?');">Удалить</a>
+                  <?php if (!$rec['status']): ?>
+                    <a href="update_status.php?id=<?= $rec['id'] ?>&action=close" class="btn btn-sm btn-success">Закрыть</a>
                   <?php else: ?>
-                    <a href="update_status.php?id=<?= $task['id'] ?>&action=undone" class="btn btn-sm btn-warning">Отметить невыполненной</a>
+                    <a href="update_status.php?id=<?= $rec['id'] ?>&action=open" class="btn btn-sm btn-warning">Открыть</a>
                   <?php endif; ?>
                 </td>
               </tr>

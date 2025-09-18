@@ -1,22 +1,12 @@
 <?php
 require_once 'config.php';
-$mysqli = db_connect();
-if (!isset($_GET['id']) || !isset($_GET['action'])) {
-    header('Location: index.php');
-    exit;
+$mysqli=db_connect();
+$id=intval($_GET['id']??0);
+$action=$_GET['action']??'';
+if($id>0){
+ $status=($action==='close')?1:0;
+ $stmt=$mysqli->prepare('UPDATE finances SET status=? WHERE id=?');
+ $stmt->bind_param('ii',$status,$id);
+ $stmt->execute(); $stmt->close();
 }
-$id = intval($_GET['id']);
-$action = $_GET['action'];
-if ($id > 0) {
-    if ($action === 'done') {
-        $status = 1;
-    } else { 
-        $status = 0;
-    }
-    $stmt = $mysqli->prepare('UPDATE tasks SET status = ? WHERE id = ?');
-    $stmt->bind_param('ii', $status, $id);
-    $stmt->execute();
-    $stmt->close();
-}
-header('Location: index.php');
-exit;
+header('Location: index.php'); exit;
